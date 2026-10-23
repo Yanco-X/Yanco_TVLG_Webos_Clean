@@ -98,6 +98,8 @@ Versiones actuales: launcher `com.gathin.tvhome` 1.3.0, helper `com.local.native
   repo independiente (no es un fork). Todos los cambios se suben solo aquí.
 - `upstream`: Razdva122/clean-your-tv-lg-webos, **solo lectura** (push deshabilitado). Nunca abras
   pull requests ni subas nada al repo original.
-- `main` sigue a upstream; el trabajo propio va en la rama `mi-launcher`.
-- Para traer novedades: `git fetch upstream && git switch main && git merge upstream/main`,
-  y luego `git switch mi-launcher && git merge main`.
+- Un solo desarrollador: se trabaja y se hacen commits **directamente en `main`**, que sigue a
+  `origin/main`. No hace falta crear ramas ni pull requests.
+- Traer novedades de upstream solo cuando el usuario lo pida:
+  `git fetch upstream && git merge upstream/main` (ver la nota de Prettier sobre los conflictos
+  en `app.js` y `app-library.js`).
