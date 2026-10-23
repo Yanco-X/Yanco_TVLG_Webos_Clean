@@ -39,6 +39,9 @@ o carga antes `scripts/lib/tv-env.sh`.
   - `index.html`, `style.css`: estructura y estilo.
   - `app.js`: lógica del launcher (cuadrícula, foco, dock, teclas del control, reloj).
     Las posiciones de los mosaicos se calculan aquí, en un lienzo fijo de 1920×1080.
+  - `app-library.js`: disposición persistente de la pantalla (orden y apps ocultas, en
+    `localStorage` con la clave `tvhome.layout`), independiente del inventario de la TV.
+    Es el punto de partida natural para grupos o segmentos.
   - `config.js`: configuración del usuario (`columns` 1–8, `dockApps`, `hiddenApps`; IDs de app
     con `python3 sync-apps.py 192.168.1.2 --list`).
   - `apps.js` e `icons/`: generados por `sync-apps.py`, privados y en `.gitignore`.
@@ -47,6 +50,19 @@ o carga antes `scripts/lib/tv-env.sh`.
 - `native/`: helper nativo que intercepta el botón Home. No tocarlo para cambios de diseño;
   si se toca, hay que usar la instalación completa.
 - `root-edition/`: edición para TVs rooteadas, no usada aquí.
+- `cytv/`: instalador asistido del autor (binarios en sus releases). Aquí se usa `install.sh` en WSL.
+
+Versiones actuales: launcher `com.gathin.tvhome` 1.3.0, helper `com.local.nativehome` 0.6.14.
+"Enviar launcher a la TV" solo reinstala el launcher: si un cambio de upstream toca `native/`
+(sube la versión del helper), usa "Instalación completa".
+
+## Pruebas
+
+- `scripts/test.sh` es la batería del autor; necesita un compilador de C
+  (`sudo apt install build-essential`).
+- Sin compilador: `for f in launcher/*.js; do node --check "$f"; done`, los `tests/*.cjs` y
+  `.venv/bin/python3 -m unittest discover -s tests -p test_preview.py`.
+- `tests/renewal-ui.cjs` falla también en upstream (falta un módulo) y no está en `test.sh`: ignóralo.
 
 ## Reglas y trampas
 
@@ -63,8 +79,13 @@ o carga antes `scripts/lib/tv-env.sh`.
   muy recientes (anidamiento CSS, `:has()`, container queries…) salvo que se pruebe en la TV.
 - **Secretos**: nunca imprimas ni subas `.env`, `.lgtv-key.json`, claves de `~/.ssh/` ni la
   passphrase de Developer Mode. No ejecutes `ares-setup-device --listfull` (muestra passphrases).
-- `app.js` venía minificado del repo original; en este fork se formateó con Prettier para poder
-  editarlo. Al traer cambios de upstream a `app.js`, espera conflictos y reaplica a mano.
+- `app.js` y `app-library.js` vienen minificados de upstream; en este fork se formatearon con
+  Prettier (`npx prettier@3.3.3 --write`) para poder editarlos. Al traer cambios de upstream a
+  esos archivos habrá conflictos: toma la versión de upstream, formatéala con el mismo comando,
+  comprueba que `npx esbuild --minify` da lo mismo que el original y reaplica encima los cambios
+  propios.
+- Crear archivos desde Windows (`\\wsl.localhost\...`) puede dejarlos con dueño `root` y romper
+  `git switch`. Créalos desde Ubuntu o corrige con `sudo chown -R airen:airen <ruta>`.
 
 ## Git
 
