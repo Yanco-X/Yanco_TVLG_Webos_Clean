@@ -1,0 +1,54 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Vista previa",
+      "detail": "Launcher con apps de ejemplo en http://127.0.0.1:8765 (recarga al guardar)",
+      "type": "shell",
+      "command": "python3 scripts/preview.py",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "preview",
+        "pattern": { "regexp": "^__never__$" },
+        "background": { "activeBegins": true, "beginsPattern": "^Launcher preview", "endsPattern": "^Stop: Ctrl\\+C" }
+      },
+      "presentation": { "panel": "dedicated", "reveal": "silent" }
+    },
+    {
+      "label": "Enviar launcher a la TV",
+      "detail": "Empaqueta solo launcher/, lo instala en la TV y lo abre",
+      "type": "shell",
+      "command": "bash scripts/tv-deploy-launcher.sh",
+      "problemMatcher": [],
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "Captura de la TV",
+      "detail": "Guarda build/screenshots/latest.jpg y la abre",
+      "type": "shell",
+      "command": ". scripts/lib/tv-env.sh && code -r \"$(python3 scripts/tv-screenshot.py \"$TV_HOST\")\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Sincronizar apps de la TV",
+      "detail": "Regenera launcher/apps.js e iconos desde las apps instaladas",
+      "type": "shell",
+      "command": ". scripts/lib/tv-env.sh && python3 sync-apps.py \"$TV_HOST\"",
+      "problemMatcher": []
+    },
+    {
+      "label": "Comprobar JS",
+      "detail": "node --check de launcher/*.js",
+      "type": "shell",
+      "command": "for f in launcher/*.js; do node --check \"$f\" || exit 1; done && echo OK",
+      "problemMatcher": []
+    },
+    {
+      "label": "Instalación completa",
+      "detail": "install.sh: recompila el helper nativo y reinstala todo (pide la passphrase)",
+      "type": "shell",
+      "command": ". scripts/lib/tv-env.sh && ./install.sh \"$TV_HOST\"",
+      "problemMatcher": []
+    }
+  ]
+}
