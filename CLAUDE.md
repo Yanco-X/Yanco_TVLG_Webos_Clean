@@ -1,8 +1,8 @@
 # CLAUDE.md
 
-Fork personal de [Razdva122/clean-your-tv-lg-webos](https://github.com/Razdva122/clean-your-tv-lg-webos):
+Copia personal e independiente de [Razdva122/clean-your-tv-lg-webos](https://github.com/Razdva122/clean-your-tv-lg-webos):
 un launcher (pantalla de inicio) para TVs LG webOS sin root, instalado mediante Developer Mode.
-El objetivo de este fork es **personalizar el diseño del launcher** (grupos, segmentos, fondos,
+El objetivo de este repo es **personalizar el diseño del launcher** (grupos, segmentos, fondos,
 tipografía, temas). Responde en español.
 
 ## La TV
@@ -85,7 +85,7 @@ Versiones actuales: launcher `com.gathin.tvhome` 1.3.0, helper `com.local.native
 - **Secretos**: nunca imprimas ni subas `.env`, `.lgtv-key.json`, claves de `~/.ssh/` ni la
   passphrase de Developer Mode. No ejecutes `ares-setup-device --listfull` (muestra passphrases).
 - `app.js` y `app-library.js` vienen minificados de upstream; en este fork se formatearon con
-  Prettier (`npx prettier@3.3.3 --write`) para poder editarlos. Al traer cambios de upstream a
+  Prettier (`npx prettier@3.3.3 --write`) para poder editarlos en este repo. Al traer cambios de upstream a
   esos archivos habrá conflictos: toma la versión de upstream, formatéala con el mismo comando,
   comprueba que `npx esbuild --minify` da lo mismo que el original y reaplica encima los cambios
   propios.
@@ -94,7 +94,10 @@ Versiones actuales: launcher `com.gathin.tvhome` 1.3.0, helper `com.local.native
 
 ## Git
 
-- `origin`: este fork. `upstream`: Razdva122/clean-your-tv-lg-webos.
+- `origin`: [Yanco-X/Yanco_TVLG_Webos_Clean](https://github.com/Yanco-X/Yanco_TVLG_Webos_Clean),
+  repo independiente (no es un fork). Todos los cambios se suben solo aquí.
+- `upstream`: Razdva122/clean-your-tv-lg-webos, **solo lectura** (push deshabilitado). Nunca abras
+  pull requests ni subas nada al repo original.
 - `main` sigue a upstream; el trabajo propio va en la rama `mi-launcher`.
 - Para traer novedades: `git fetch upstream && git switch main && git merge upstream/main`,
   y luego `git switch mi-launcher && git merge main`.
