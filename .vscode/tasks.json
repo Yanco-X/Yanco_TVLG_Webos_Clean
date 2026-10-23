@@ -45,7 +45,14 @@
     },
     {
       "label": "Instalación completa",
-      "detail": "install.sh: recompila el helper nativo y reinstala todo (pide la passphrase)",
+      "detail": "Recompila el helper nativo y reinstala todo en la TV ya emparejada (sin passphrase)",
+      "type": "shell",
+      "command": "bash scripts/tv-reinstall.sh",
+      "problemMatcher": []
+    },
+    {
+      "label": "Emparejar e instalar (install.sh)",
+      "detail": "Primera instalación o volver a emparejar: pide la passphrase de Developer Mode",
       "type": "shell",
       "command": ". scripts/lib/tv-env.sh && ./install.sh \"$TV_HOST\"",
       "problemMatcher": []

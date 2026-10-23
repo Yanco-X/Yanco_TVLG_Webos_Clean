@@ -24,10 +24,15 @@ envuelven estos comandos:
 | Enviar solo el launcher a la TV | `bash scripts/tv-deploy-launcher.sh` | Enviar launcher a la TV (Ctrl+Shift+B) |
 | Captura de la pantalla real | `python3 scripts/tv-screenshot.py 192.168.1.2` → `build/screenshots/latest.jpg` | Captura de la TV |
 | Releer apps instaladas en la TV | `python3 sync-apps.py 192.168.1.2` | Sincronizar apps de la TV |
-| Reinstalar todo (helper incluido) | `./install.sh 192.168.1.2` (interactivo: pide passphrase) | Instalación completa |
+| Reinstalar todo (helper incluido), TV ya emparejada | `bash scripts/tv-reinstall.sh` | Instalación completa |
+| Primera instalación o re-emparejar | `./install.sh 192.168.1.2` (interactivo: pide passphrase) | Emparejar e instalar (install.sh) |
 
 Ciclo habitual: editar `launcher/` → revisar en la vista previa → enviar a la TV → captura →
 leer `build/screenshots/latest.jpg` para comprobar cómo se ve en la pantalla real.
+
+`ares-launch` del helper no abre el launcher por sí solo; para comprobar el botón Home se puede
+abrir otra app y pulsar Home desde la red con el socket de entrada SSAP
+(`ssap://com.webos.service.networkinput/getPointerInputSocket`, mensaje `type:button\nname:HOME\n\n`).
 
 Los scripts `tv-*` cargan `.env` y anteponen al PATH la CLI de webOS fijada en `build/tools/`
 y el `.venv` de Python (los crea `install.sh`). Para ejecutar Python del repo usa `.venv/bin/python3`
