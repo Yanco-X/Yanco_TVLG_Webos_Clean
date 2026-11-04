@@ -7,6 +7,12 @@
   <link rel="stylesheet" href="renewal-panel.css">
 </head>
 <body>
+  <!-- Time-of-day wallpaper (wallpaper.js); two layers so photos crossfade, plus a scrim so the
+       clock and the tiles stay readable on bright photos. -->
+  <div id="wallA" class="wall"></div>
+  <div id="wallB" class="wall"></div>
+  <div id="wallScrim"></div>
+
   <!-- Ambient glow in the colour of the focused dock app; two layers so colours crossfade. -->
   <div id="ambientA" class="ambient"></div>
   <div id="ambientB" class="ambient"></div>
@@ -56,6 +62,7 @@
   <div id="toast"></div>
 
   <script src="config.js"></script>
+  <script src="wallpaper.js"></script>
   <script src="apps.js"></script>
   <script src="app-library.js"></script>
   <script src="user-data.js"></script>

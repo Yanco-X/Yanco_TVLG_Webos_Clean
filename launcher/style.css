@@ -28,6 +28,38 @@ html, body {
   cursor: default;
 }
 
+/* ---- wallpaper ------------------------------------------------------------------------------- */
+
+/* Photo layers; wallpaper.js sets the image and crossfades them by opacity only. */
+.wall {
+  position: absolute;
+  inset: 0;
+  background: #000 center / cover no-repeat;
+  opacity: 0;
+  transition: opacity 1500ms ease;
+  pointer-events: none;
+}
+
+/* Darkens the photo where the clock (top) and the tiles (bottom) sit. One static layer: only its
+   opacity changes with the time band, so nothing repaints while navigating. */
+#wallScrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.1) 30%, rgba(0, 0, 0, 0.25) 55%, rgba(0, 0, 0, 0.85) 100%),
+    rgba(0, 0, 0, 0.2);
+  opacity: 0.85;
+  transition: opacity 1500ms ease;
+  pointer-events: none;
+}
+
+/* Bright photos need more darkening than night ones. */
+body[data-band="manana"] #wallScrim,
+body[data-band="mediodia"] #wallScrim,
+body[data-band="tarde"] #wallScrim { opacity: 1; }
+body[data-band="noche"] #wallScrim,
+body[data-band="madrugada"] #wallScrim { opacity: 0.7; }
+
 /* ---- ambient glow ---------------------------------------------------------------------------- */
 
 .ambient {
@@ -205,7 +237,8 @@ body.scrolled header {
 #dockBand {
   position: absolute;
   border-radius:var(--radius);
-  background: #141416;
+  /* Translucent so the wallpaper shows through; no blur (too costly on the TV). */
+  background: rgba(14, 14, 16, 0.55);
   border: 2px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -277,7 +310,8 @@ body.editing #glass { opacity: 0 !important; }
   width: calc(var(--pitch) - 12px);
   height: 30px;
   margin: 12px 0 0 calc((var(--tile) - var(--pitch) + 12px) / 2);
-  color: rgba(255, 255, 255, 0.6);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-size: 21px;
   font-weight: 500;
   letter-spacing: 0.02em;

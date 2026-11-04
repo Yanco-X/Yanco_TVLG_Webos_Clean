@@ -16,7 +16,8 @@ LAUNCHER_FILES = {
     'index.html', 'style.css', 'renewal-panel.css', 'app.js', 'app-library.js', 'config.js',
     'user-data.js', 'update-panel.js', 'renewal-panel.js', 'profile-bootstrap.js',
     'native-bootstrap.js', 'helper-control.js', 'fonts/outfit.ttf', 'fonts/OFL.txt',
-}
+    'wallpaper.js', 'wallpapers/CREDITS.md',
+} | {'wallpapers/' + p.name for p in (Path(__file__).resolve().parent.parent / 'launcher/wallpapers').glob('*.jpg')}
 DEMO_APPS = [
     ('youtube', 'YouTube', '#ffffff'),
     ('netflix', 'Netflix', '#ffffff'),
@@ -35,6 +36,9 @@ ROOT_LAUNCHER_FILES = {
     'root-exit.js', 'root-settings.js', 'root-settings.css',
     'root-profile-data.js', 'root-profile.js', 'root-updates.js',
 }
+# Wallpapers come straight from launcher/; the Root staging does not know about them.
+WALLPAPER_FILES = {name for name in LAUNCHER_FILES if name.startswith('wallpaper')}
+ROOT_LAUNCHER_FILES |= WALLPAPER_FILES
 ICON_FILES = {app_id + '.svg' for app_id, _, _ in DEMO_APPS}
 
 
@@ -72,7 +76,8 @@ def launcher_html():
 def root_launcher():
     # Reuse the isolated Root UI staging, without any installer or runtime services.
     staged = runpy.run_path(str(ROOT / 'root-edition/preview.py'))['prepare']()
-    files = {name: staged[name] for name in ROOT_LAUNCHER_FILES}
+    files = {name: staged[name] for name in ROOT_LAUNCHER_FILES - WALLPAPER_FILES}
+    files.update({name: (ROOT / 'launcher' / name).read_bytes() for name in WALLPAPER_FILES})
     files['apps.js'] = ('window.TV_APPS = ' + json.dumps(inventory()) + ';\n').encode()
     files['index.html'] = files['index.html'].replace(
         b'<head>', b'<head>\n  <script src="../preview/bridge.js"></script>', 1)
