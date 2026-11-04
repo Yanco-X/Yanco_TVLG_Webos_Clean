@@ -47,8 +47,9 @@ o carga antes `scripts/lib/tv-env.sh`.
   - `app-library.js`: disposición persistente de la pantalla (orden y apps ocultas, en
     `localStorage` con la clave `tvhome.layout`), independiente del inventario de la TV.
     Es el punto de partida natural para grupos o segmentos.
-  - `config.js`: configuración del usuario (`columns` 1–8, `dockApps`, `hiddenApps`; IDs de app
-    con `python3 sync-apps.py 192.168.1.2 --list`).
+  - `config.js`: configuración del usuario (`columns` 1–12, `dockApps`, `hiddenApps`; IDs de app
+    con `python3 sync-apps.py 192.168.1.2 --list`). El máximo lo impone `user-data.js` al guardar
+    el perfil (en upstream era 8); `root-edition/` mantiene su propio límite de 8.
   - `apps.js` e `icons/`: generados por `sync-apps.py`, privados y en `.gitignore`.
   - `user-data.js`: debe ser idéntico a `updater-service/user-data.js` (lo comprueba `scripts/test.sh`).
 - `preview/` y `scripts/preview.py`: vista previa con apps de ejemplo y servicios webOS simulados.
@@ -91,6 +92,12 @@ Versiones actuales: launcher `com.gathin.tvhome` 1.3.0, helper `com.local.native
   propios.
 - Crear archivos desde Windows (`\\wsl.localhost\...`) puede dejarlos con dueño `root` y romper
   `git switch`. Créalos desde Ubuntu o corrige con `sudo chown -R airen:airen <ruta>`.
+- **Perfil guardado**: buscar actualizaciones en Settings guarda un perfil (`tvhome.profile.v1` en
+  `localStorage`) con `CONFIG` y el inventario. Si existe, `profile-bootstrap.js` lo carga al
+  arrancar en lugar de `config.js` y `apps.js`, y los cambios enviados con "Enviar launcher" dejan
+  de verse. Hay que borrar esa clave para que vuelvan a aplicarse.
+- **Lupa del cristal**: `#lens` copia solo el `.card` de cada mosaico, fuera de su `.item`. Estila
+  las tarjetas con clases del propio `.card` (como `.card.add-card`), no con `.item-x .card`.
 
 ## Git
 

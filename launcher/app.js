@@ -157,7 +157,8 @@
     el.setAttribute("role", "button");
     el.setAttribute("aria-label", "Add app");
     el.innerHTML =
-      '<div class="card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 10v28M10 24h28"/></svg></div><div class="name">Add app</div>';
+      // add-card on the card itself: the glass lens copies only .card, outside .add-app.
+      '<div class="card add-card"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 10v28M10 24h28"/></svg></div><div class="name">Add app</div>';
     var item = {
       add: true,
       app: { title: "Add app" },

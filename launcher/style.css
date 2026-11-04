@@ -391,9 +391,10 @@ body.helper-stopped #timeRow { width: 400px; }
 body.helper-stopped .divider { display: none; }
 body.helper-stopped #date { position: absolute; left: 8px; top: 150px; margin: 0; font-size: 24px; }
 
-/* Screen editing: the + tile is fixed at the end, outside the movable apps. */
-.add-app .card { display:flex; align-items:center; justify-content:center; background:#202126; border:2px dashed #62656d; }
-.add-app svg { width:64px; height:64px; fill:none; stroke:currentColor; stroke-width:3; }
+/* Screen editing: the + tile is fixed at the end, outside the movable apps. Styled through the
+   card's own class so the magnified copy in #lens (a bare .card) keeps the + and dashed rim. */
+.card.add-card { display:flex; align-items:center; justify-content:center; background:#202126; border:2px dashed #62656d; }
+.add-card svg { width:64px; height:64px; fill:none; stroke:currentColor; stroke-width:3; }
 .card.missing-icon { display:flex; align-items:center; justify-content:center; background:#292c34; }
 .card.missing-icon::after { content:attr(data-initial); font-size:calc(var(--tile) * 0.4); display:flex; align-items:center; justify-content:center; }
 .item.moving .card { outline:4px solid #fff; box-shadow:0 22px 60px #000b; }
