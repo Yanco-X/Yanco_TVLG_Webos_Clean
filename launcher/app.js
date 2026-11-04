@@ -10,13 +10,7 @@
     rowPitch = tileSize + 80,
     a = 13,
     i = 461,
-    o = [
-      [5, "Good night"],
-      [12, "Good morning"],
-      [17, "Good afternoon"],
-      [22, "Good evening"],
-      [24, "Good night"],
-    ],
+    o = [[24, "Holo, Kate y Yankito y compañía (?)"]],
     r = [
       "Sunday",
       "Monday",
@@ -51,6 +45,25 @@
     m = 0,
     v = null,
     h = [l("btnInputs"), l("btnWifi"), l("btnSettings")],
+    // Material Icons (Apache 2.0): wifi, lan and wifi_off, for the connection pill.
+    lens = l("lens"),
+    pillGlass = l("pillGlass"),
+    pillLens = l("pillLens"),
+    PILL_ZOOM = 1.06,
+    // Rebuilt with the inputs list each time it opens.
+    inputGlass = null,
+    inputLens = null,
+    INPUT_ZOOM = 1.04,
+    // Magnification inside the glass; an icon at rest under it ends up this much larger.
+    LENS_ZOOM = 1.1,
+    // Tiles copied into the lens: { item, node }. Grows while the glass travels, pruned after.
+    lensCopies = [],
+    networkIcons = {
+      wifi: l("wifiIcon").getAttribute("d"),
+      wired: "M13,22h8v-7h-3v-4h-5V9h3V2H8v7h3v2H6v4H3v7h8v-7H8v-2h8v2h-3z",
+      offline:
+        "M23.64,7c-0.45,-0.34 -4.93,-4 -11.64,-4c-1.5,0 -2.89,0.19 -4.15,0.48L18.18,13.8L23.64,7zM17.04,15.22L3.27,1.44L2,2.72l2.05,2.06C1.91,5.76 0.59,6.82 0.36,7l11.63,14.49l0.01,0.01l0.01,-0.01l3.9,-4.86l3.32,3.32l1.27,-1.27l-3.46,-3.46z",
+    },
     g = l("inputsPanel"),
     y = [],
     x = "grid",
@@ -584,6 +597,7 @@
     return t > 0 ? dockTop + tileSize + 76 + rowPitch * (t - 1) : dockTop;
   }
   function F() {
+    clearLens();
     var root = document.documentElement.style;
     root.setProperty("--tile", tileSize + "px"), root.setProperty("--pitch", n + "px");
     y.forEach(function (e, t) {
@@ -692,6 +706,7 @@
       (d.style.width = o + "px"),
         (d.style.height = r + "px"),
         (d.style.transform = "translate(" + s + "px," + l + "px)"),
+        moveLens(s, l, o, k),
         k ||
           ((d.style.transition = "none"),
           d.offsetWidth,
@@ -746,16 +761,107 @@
       }
     }
   }
+  // Magnifies what is under the glass: copies of the nearby icons, scaled by LENS_ZOOM about the
+  // glass centre. The copy layer glides on the same transition as #glass, and its translate is a
+  // linear function of the glass position, so the two stay aligned on every frame.
+  function moveLens(gx, gy, size, shown) {
+    var zoom = LENS_ZOOM,
+      shift = (size / 2) * (1 - zoom),
+      from = lens.glassAt || [gx, gy];
+    lens.glassAt = [gx, gy];
+    // Copy every tile the glass can cross between its last target and this one.
+    var x0 = Math.min(from[0], gx),
+      y0 = Math.min(from[1], gy),
+      x1 = Math.max(from[0], gx) + size,
+      y1 = Math.max(from[1], gy) + size;
+    y.forEach(function (item, i) {
+      var tx = G(i),
+        ty = H(i);
+      if (tx + tileSize < x0 || tx > x1 || ty + tileSize < y0 || ty > y1) return;
+      copyIntoLens(item, tx, ty, false);
+    });
+    y[L] && copyIntoLens(y[L], G(L), H(L), true);
+    shown || (lens.style.transition = "none");
+    lens.style.transform =
+      "translate(" +
+      (shift - zoom * gx) +
+      "px," +
+      (shift - zoom * gy) +
+      "px) scale(" +
+      zoom +
+      ")";
+    shown || (lens.offsetWidth, (lens.style.transition = ""));
+  }
+  // refresh: re-copy even if present, since a card gets its colour only once its icon loads.
+  function copyIntoLens(item, x, y0, refresh) {
+    var found = lensCopies.filter(function (c) {
+      return c.item === item;
+    })[0];
+    if (found && !refresh) return;
+    var node = item.el.querySelector(".card").cloneNode(true);
+    (node.style.left = x + "px"), (node.style.top = y0 + "px");
+    found
+      ? (lens.replaceChild(node, found.node), (found.node = node))
+      : (lens.appendChild(node), lensCopies.push({ item: item, node: node }));
+  }
+  function clearLens() {
+    (lens.innerHTML = ""), (lensCopies = []), (lens.glassAt = null);
+  }
+  // The pill row's and the inputs list's version of moveLens: glide a glass to the focused
+  // element and refresh the magnified copies of its siblings (labels change, e.g. the network
+  // name). The copies' translate is linear in the glass box, so both glide in step.
+  function glideGlass(glass, lensEl, target, items, zoom, pad) {
+    var gx = target.offsetLeft - pad,
+      gy = target.offsetTop - pad,
+      w = target.offsetWidth + 2 * pad,
+      gh = target.offsetHeight + 2 * pad,
+      first = !glass.shown;
+    lensEl.innerHTML = "";
+    items.forEach(function (p) {
+      var copy = p.cloneNode(true);
+      copy.removeAttribute("id");
+      copy.classList.remove("focused");
+      Array.prototype.forEach.call(copy.querySelectorAll("[id]"), function (n) {
+        n.removeAttribute("id");
+      });
+      (copy.style.left = p.offsetLeft + "px"),
+        (copy.style.top = p.offsetTop + "px"),
+        (copy.style.width = p.offsetWidth + "px"),
+        lensEl.appendChild(copy);
+    });
+    first && ((glass.style.transition = "none"), (lensEl.style.transition = "none"));
+    (glass.style.width = w + "px"),
+      (glass.style.height = gh + "px"),
+      (glass.style.transform = "translate(" + gx + "px," + gy + "px)"),
+      (lensEl.style.transform =
+        "translate(" +
+        ((w / 2) * (1 - zoom) - zoom * gx) +
+        "px," +
+        ((gh / 2) * (1 - zoom) - zoom * gy) +
+        "px) scale(" +
+        zoom +
+        ")");
+    first &&
+      (glass.offsetWidth, (glass.style.transition = ""), (lensEl.style.transition = ""));
+    (glass.style.opacity = "1"), (glass.shown = !0);
+  }
+  function movePillGlass() {
+    glideGlass(pillGlass, pillLens, h[b], h, PILL_ZOOM, 6);
+  }
+  function hidePillGlass() {
+    (pillGlass.style.opacity = "0"), (pillGlass.shown = !1);
+  }
   function R(e) {
     _("top"),
       document.body.classList.remove("scrolled"),
       h[b].classList.remove("focused"),
       (b = Math.max(0, Math.min(e, h.length - 1))),
-      h[b].classList.add("focused");
+      h[b].classList.add("focused"),
+      movePillGlass();
   }
   function _(e) {
     x !== e &&
-      ("top" === x && h[b].classList.remove("focused"),
+      ("top" === x && (h[b].classList.remove("focused"), hidePillGlass()),
       "grid" === x &&
         (y[L] && y[L].el.classList.remove("focused"),
         (k = !1),
@@ -805,12 +911,19 @@
               )),
             w.length)
           ) {
+            (inputGlass = document.createElement("div")),
+              (inputGlass.className = "lensGlass"),
+              (inputLens = document.createElement("div")),
+              (inputLens.className = "glassCopies"),
+              inputGlass.appendChild(inputLens),
+              g.appendChild(inputGlass);
             var e = h[0].getBoundingClientRect();
             (g.style.left = e.left + "px"),
               (g.style.top = e.bottom + 20 + "px"),
               (g.style.minWidth = Math.max(e.width, 300) + "px"),
               g.classList.remove("hidden"),
               h[b].classList.remove("focused"),
+              hidePillGlass(),
               (x = "inputs"),
               Y(0);
           } else O("No inputs found");
@@ -841,7 +954,8 @@
   function Y(e) {
     w[C] && w[C].classList.remove("focused"),
       (C = Math.max(0, Math.min(e, w.length - 1))),
-      w[C].classList.add("focused");
+      w[C].classList.add("focused"),
+      glideGlass(inputGlass, inputLens, w[C], w, INPUT_ZOOM, 0);
   }
   function $() {
     g.classList.add("hidden"), (x = "none"), R(0);
@@ -986,6 +1100,13 @@
       document.hidden || te();
     }),
     initializeApps(),
+    d.addEventListener("transitionend", function (ev) {
+      if (ev.target !== d || "transform" !== ev.propertyName) return;
+      lensCopies = lensCopies.filter(function (c) {
+        if (c.item === y[L]) return !0;
+        return lens.removeChild(c.node), !1;
+      });
+    }),
     F(),
     X(),
     setInterval(X, 1e4),
@@ -994,13 +1115,17 @@
       { subscribe: !0 },
       function (e) {
         if (!1 !== e.returnValue || e.wifi || e.wired) {
-          var t = "Wi-Fi";
+          var t = "Wi-Fi",
+            n = "wifi";
           e.wired && "connected" === e.wired.state
-            ? (t = "Ethernet")
+            ? ((t = "Ethernet"), (n = "wired"))
             : e.wifi && "connected" === e.wifi.state
               ? (t = e.wifi.ssid || "Wi-Fi")
-              : !1 === e.isInternetConnectionAvailable && (t = "Offline"),
-            (l("wifiLabel").textContent = t);
+              : !1 === e.isInternetConnectionAvailable &&
+                ((t = "Offline"), (n = "offline")),
+            (l("wifiLabel").textContent = t),
+            l("wifiIcon").setAttribute("d", networkIcons[n]),
+            "top" === x && movePillGlass();
         }
       },
     ),

@@ -13,6 +13,9 @@
   --tile: 130px;
   --pitch: 170px;
   --radius: 5px;
+  /* The glass highlight's glide; the icons grow and shrink on the same curve so each icon swells
+     as the glass covers it instead of popping on its own clock. */
+  --glide: 520ms cubic-bezier(0.3, 1.35, 0.45, 1);
 }
 
 html, body {
@@ -115,9 +118,10 @@ body.scrolled header {
   white-space: pre;
 }
 
-#topButtons { display: flex; margin-bottom: 12px; }
+#topButtons { position: relative; display: flex; margin-bottom: 12px; }
 
-/* Frosted pill, tvOS style. */
+/* Liquid glass pill: light catching the rims. No backdrop-filter: on the TV, blurring the pills
+   re-renders them on every frame of the ambient crossfade (59 -> 39 fps). */
 .pill {
   display: flex;
   align-items: center;
@@ -125,24 +129,63 @@ body.scrolled header {
   margin-left: 14px;
   padding: 0 28px 0 22px;
   border-radius:var(--radius);
-  border: 2px solid rgba(255, 255, 255, 0.22);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.08));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.16),
+    0 6px 20px rgba(0, 0, 0, 0.25);
   color: #fff;
   font-size: 24px;
   font-weight: 500;
   letter-spacing: 0.01em;
   white-space: nowrap;
-  transition: background 160ms ease, color 160ms ease, transform 200ms ease;
+  transition: background 200ms ease, box-shadow 200ms ease, transform 260ms cubic-bezier(0.34, 1.5, 0.5, 1);
 }
 
 .pill svg { width: 32px; height: 32px; margin-right: 12px; fill: currentColor; }
 
-.pill.focused {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: transparent;
-  color: #000;
-  transform: scale(1.04);
+/* Focus is the gliding #pillGlass below; the pills themselves stay still. */
+
+/* Same idea as #glass over the tiles, for the pill row and the inputs list: one glass lens
+   glides to the focused element and .glassCopies holds magnified copies of its siblings, so an
+   element swells only where the glass covers it. app.js sets the size and position. */
+.lensGlass {
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius:var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1)),
+    rgba(40, 40, 46, 0.88);
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.16), 0 10px 28px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform var(--glide), width var(--glide);
 }
+
+.lensGlass::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius:var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 45%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.4),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.12);
+}
+
+.glassCopies {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  transition: transform var(--glide);
+}
+
+.glassCopies .pill, .glassCopies .inputRow { position: absolute; margin: 0; box-shadow: none; }
 
 /* ---- grid ------------------------------------------------------------------------------------ */
 
@@ -201,7 +244,7 @@ body.editing #glass { opacity: 0 !important; }
   border-radius:var(--radius);
   overflow: hidden;
   background: #1c1c1e;
-  transition: transform 180ms ease;
+  transition: transform var(--glide);
 }
 
 /* Faint rim so black tiles (Apple TV) still read against the black page. */
@@ -211,11 +254,6 @@ body.editing #glass { opacity: 0 !important; }
   inset: 0;
   border-radius:var(--radius);
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.1);
-}
-
-.item.focused .card {
-  transform: scale(1.1);
-  transition: transform 260ms cubic-bezier(0.34, 1.6, 0.5, 1);
 }
 
 .card img {
@@ -247,43 +285,60 @@ body.editing #glass { opacity: 0 !important; }
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  transition: color 220ms ease, transform 220ms ease;
+  transition: color var(--glide), transform var(--glide);
 }
 
 .item.focused .name { color: #fff; transform: translateY(8px); }
 
-/* The single floating glass highlight that springs between tiles. */
+/* The single floating glass lens that springs between tiles. Inside it, #lens holds magnified
+   copies of the icons under it, so only the part of an icon the glass covers is enlarged. The
+   base is mostly opaque so the unmagnified tiles do not show through around the copies. No blur:
+   it moves too often for the TV. */
 #glass {
   position: absolute;
   left: 0;
   top: 0;
   border-radius:var(--radius);
-  border: 3px solid rgba(255, 255, 255, 0.8);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.07));
-  box-shadow: 0 0 4px 2px rgba(255, 255, 255, 0.19), 0 0 12px 4px rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05)),
+    rgba(22, 22, 26, 0.82);
+  box-shadow: 0 0 18px rgba(255, 255, 255, 0.12), 0 14px 30px rgba(0, 0, 0, 0.45);
   overflow: hidden;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 180ms ease, transform 520ms cubic-bezier(0.3, 1.35, 0.45, 1);
+  transition: opacity 180ms ease, transform var(--glide);
 }
 
-/* Bright top specular. */
-#glass::before {
+/* Rims and top specular, above the magnified icons. */
+#glass::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 0;
-  height: 45%;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0));
+  inset: 0;
+  border-radius:var(--radius);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0) 35%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.75),
+    inset 0 0 0 1.5px rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.12);
 }
+
+/* Stage coordinates mapped into the lens; app.js sets translate() scale(), gliding with #glass. */
+#lens {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  transition: transform var(--glide);
+}
+
+#lens .card { position: absolute; }
 
 /* ---- inputs dropdown ------------------------------------------------------------------------- */
 
 #inputsPanel {
   position: absolute;
   z-index: 5;
-  padding: 16px;
+  padding: 8px;
   border-radius:var(--radius);
   border: 2px solid rgba(255, 255, 255, 0.2);
   background: linear-gradient(180deg, rgba(42, 42, 46, 0.95), rgba(22, 22, 24, 0.96));
@@ -296,19 +351,19 @@ body.editing #glass { opacity: 0 !important; }
 .inputRow {
   display: flex;
   align-items: center;
-  height: 84px;
-  padding: 0 24px;
+  height: 58px;
+  padding: 0 20px 0 16px;
   border-radius:var(--radius);
-  font-size: 30px;
+  font-size: 24px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.inputRow svg { width: 40px; height: 40px; margin-right: 20px; fill: currentColor; }
+.inputRow svg { width: 30px; height: 30px; margin-right: 14px; fill: currentColor; }
 
-.inputRow.focused { background: rgba(255, 255, 255, 0.96); color: #000; }
+/* Focus is the gliding .lensGlass. */
 
-.separator { height: 2px; margin: 12px 24px; background: rgba(255, 255, 255, 0.12); }
+.separator { height: 2px; margin: 6px 16px; background: rgba(255, 255, 255, 0.12); }
 
 /* ---- toast ----------------------------------------------------------------------------------- */
 

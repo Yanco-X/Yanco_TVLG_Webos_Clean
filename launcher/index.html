@@ -27,7 +27,7 @@
         <span>Inputs</span>
       </div>
       <div class="pill" id="btnWifi">
-        <svg viewBox="0 0 24 24"><path d="M1,9l2,2c4.97,-4.97 13.030,-4.97 18,0l2,-2C16.93,2.93 7.08,2.93 1,9zM9,17l3,3 3,-3c-1.65,-1.66 -4.34,-1.66 -6,0zM5,13l2,2c2.76,-2.76 7.24,-2.76 10,0l2,-2C15.14,9.14 8.87,9.14 5,13z"/></svg>
+        <svg viewBox="0 0 24 24"><path id="wifiIcon" d="M1,9l2,2c4.97,-4.97 13.030,-4.97 18,0l2,-2C16.93,2.93 7.08,2.93 1,9zM9,17l3,3 3,-3c-1.65,-1.66 -4.34,-1.66 -6,0zM5,13l2,2c2.76,-2.76 7.24,-2.76 10,0l2,-2C15.14,9.14 8.87,9.14 5,13z"/></svg>
         <span id="wifiLabel">Wi-Fi</span>
       </div>
       <div class="pill" id="btnSettings">
@@ -35,6 +35,8 @@
         <span>Settings</span>
       </div>
       <div class="pill hidden" id="btnResumeHome" role="button" aria-label="Enable Home control"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 2h6a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3V5a3 3 0 0 1 3-3zm0 2a1 1 0 0 0-1 1v14a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V5a1 1 0 0 0-1-1H9zm3 3a1 1 0 1 0 0-2 1 1 0 0 0 0 2zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6zm0 2a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-3 6h2v2H9zm4 0h2v2h-2z"/></svg><span>Resume Home</span></div>
+      <!-- Glass lens over the focused pill, like #glass over the tiles. -->
+      <div id="pillGlass" class="lensGlass"><div id="pillLens" class="glassCopies"></div></div>
     </div>
   </header>
 
@@ -43,7 +45,8 @@
     <div id="stage">
       <div id="dockBand"></div>
       <div id="tiles"></div>
-      <div id="glass"></div>
+      <!-- Glass lens over the tiles; app.js fills it with magnified copies of the nearby icons. -->
+      <div id="glass"><div id="lens"></div></div>
     </div>
   </div>
 
