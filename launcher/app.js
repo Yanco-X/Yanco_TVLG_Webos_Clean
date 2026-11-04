@@ -3,6 +3,11 @@
   var e,
     t = Math.max(1, CONFIG.columns || 4),
     n = 1696 / t,
+    // Square tiles sized from the column pitch so neighbours never overlap; capped at
+    // 130px, the size of the icons the TV reports, so they are never upscaled.
+    tileSize = Math.round(Math.min(130, 0.8 * n)),
+    dockTop = 814,
+    rowPitch = tileSize + 80,
     a = 13,
     i = 461,
     o = [
@@ -572,13 +577,15 @@
     return Math.floor(e / t);
   }
   function G(e) {
-    return 112 + (e % t) * n + (n - 360) / 2;
+    return 112 + (e % t) * n + (n - tileSize) / 2;
   }
   function H(e) {
     var t = A(e);
-    return 708 + 292 * t + (t > 0 ? 36 : 0);
+    return t > 0 ? dockTop + tileSize + 76 + rowPitch * (t - 1) : dockTop;
   }
   function F() {
+    var root = document.documentElement.style;
+    root.setProperty("--tile", tileSize + "px"), root.setProperty("--pitch", n + "px");
     y.forEach(function (e, t) {
       u.appendChild(e.el),
         (e.el.style.left = G(t) + "px"),
@@ -588,10 +595,10 @@
     var e = l("dockBand"),
       a = Math.min(t, y.length);
     (e.style.display = a ? "block" : "none"),
-      (e.style.left = G(0) - 28 + "px"),
-      (e.style.top = "680px"),
-      (e.style.width = (a - 1) * n + 360 + 56 + "px"),
-      (e.style.height = "258px");
+      (e.style.left = G(0) - 20 + "px"),
+      (e.style.top = dockTop - 20 + "px"),
+      (e.style.width = (a - 1) * n + tileSize + 40 + "px"),
+      (e.style.height = tileSize + 40 + "px");
   }
   function P() {
     y.forEach(function (e, t) {
@@ -671,17 +678,17 @@
         n = A(e);
       0 === n && !I
         ? (M = 0)
-        : (t - M + 202 + 70 > (I ? 850 : 1060) &&
-            (M = t + 202 + 70 - (I ? 850 : 1060)),
+        : (t - M + tileSize + 90 > (I ? 850 : 1060) &&
+            (M = t + tileSize + 90 - (I ? 850 : 1060)),
           t - M - 24 < 80 && (M = t - 24 - 80)),
         (c.style.transform = "translateY(" + -M + "px)");
       var a = document.querySelector("header"),
         i = a.offsetTop + a.offsetHeight;
-      document.body.classList.toggle("scrolled", 680 - M < i + 24);
-      var o = 1.1 * 360 + 24,
-        r = 1.1 * 202 + 24,
-        s = G(e) + 180 - o / 2,
-        l = t + 101 - r / 2;
+      document.body.classList.toggle("scrolled", dockTop - 20 - M < i + 24);
+      var o = 1.1 * tileSize + 24,
+        r = o,
+        s = G(e) + tileSize / 2 - o / 2,
+        l = t + tileSize / 2 - r / 2;
       (d.style.width = o + "px"),
         (d.style.height = r + "px"),
         (d.style.transform = "translate(" + s + "px," + l + "px)"),
@@ -694,7 +701,7 @@
         0 === n
           ? (function (e) {
               var t = e.app.title;
-              (f.style.top = "532px"),
+              (f.style.top = dockTop - 116 + "px"),
                 E
                   ? f.textContent !== t &&
                     ((f.style.opacity = "0"),

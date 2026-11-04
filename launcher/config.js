@@ -1,1 +1,1 @@
-window.CONFIG = {columns: 5, dockApps: [], hiddenApps: ["com.gathin.tvhome", "com.local.nativehome"]};
+window.CONFIG = {columns: 10, dockApps: ["youtube.leanback.v4", "spotify-beehive", "com.apple.appletv", "com.pplus.webapp.prod-intl", "com.wbd.stream", "netflix", "com.crunchyroll.webapp", "com.mubi", "tv.twitch.tv.starshot.lg", "com.webos.app.discovery"], hiddenApps: ["com.gathin.tvhome", "com.local.nativehome"]};
