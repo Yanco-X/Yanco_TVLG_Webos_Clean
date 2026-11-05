@@ -4,9 +4,9 @@
     t = Math.max(1, CONFIG.columns || 4),
     n = 1696 / t,
     // Square tiles sized from the column pitch so neighbours never overlap; capped at
-    // 130px, the size of the icons the TV reports, so they are never upscaled.
-    tileSize = Math.round(Math.min(130, 0.8 * n)),
-    dockTop = 814,
+    // 112px (smaller than the TV's 130px icons) so more of the wallpaper shows.
+    tileSize = Math.round(Math.min(112, 0.8 * n)),
+    dockTop = 846,
     rowPitch = tileSize + 80,
     a = 13,
     i = 461,
@@ -44,7 +44,9 @@
     p = [l("ambientA"), l("ambientB")],
     m = 0,
     v = null,
-    h = [l("btnInputs"), l("btnWifi"), l("btnSettings")],
+    h = [l("btnInputs"), l("btnWifi"), l("btnSettings"), l("btnApps")],
+    // Icon-only top buttons: the focused one's name shows in this tooltip under the glass.
+    pillTip = l("pillTip"),
     // Material Icons (Apache 2.0): wifi, lan and wifi_off, for the connection pill.
     lens = l("lens"),
     pillGlass = l("pillGlass"),
@@ -717,7 +719,7 @@
         0 === n
           ? (function (e) {
               var t = e.app.title;
-              (f.style.top = dockTop - 116 + "px"),
+              (f.style.top = dockTop - 88 + "px"),
                 E
                   ? f.textContent !== t &&
                     ((f.style.opacity = "0"),
@@ -847,10 +849,24 @@
     (glass.style.opacity = "1"), (glass.shown = !0);
   }
   function movePillGlass() {
+    var first = !pillGlass.shown;
     glideGlass(pillGlass, pillLens, h[b], h, PILL_ZOOM, 6);
+    showPillTip(h[b], first);
   }
   function hidePillGlass() {
     (pillGlass.style.opacity = "0"), (pillGlass.shown = !1);
+    pillTip.style.opacity = "0";
+  }
+  // Centred under the focused button, kept inside the button row's right edge; glides with the glass.
+  function showPillTip(target, first) {
+    var label = (target.getAttribute("aria-label") || target.textContent).trim();
+    pillTip.textContent = label;
+    var x = target.offsetLeft + target.offsetWidth / 2 - pillTip.offsetWidth / 2;
+    x = Math.max(0, Math.min(x, target.parentNode.offsetWidth - pillTip.offsetWidth));
+    first && (pillTip.style.transition = "none");
+    pillTip.style.transform = "translateX(" + x + "px)";
+    first && (pillTip.offsetWidth, (pillTip.style.transition = ""));
+    pillTip.style.opacity = "1";
   }
   function R(e) {
     _("top"),
@@ -882,8 +898,12 @@
         r[e.getDay()] + "  " + e.getDate() + " " + s[e.getMonth()]);
   }
   function q(e) {
-    if (3 === e) {
+    if (4 === e) {
       window.HelperControl && window.HelperControl.resume();
+      return;
+    }
+    if (3 === e) {
+      S(CONFIG.appsButton || "com.webos.app.discovery", "Apps");
       return;
     }
     0 === e
@@ -1048,7 +1068,7 @@
           else if (38 === n)
             0 === A(L)
               ? R(
-                  ((l = G(L) + 180),
+                  ((l = G(L) + tileSize / 2),
                   (c = 0),
                   (u = 1 / 0),
                   h.forEach(function (e, t) {
@@ -1074,19 +1094,19 @@
     (window.helperResumeMessage = O);
   window.setHelperResumeVisible = function (visible) {
     var button = l("btnResumeHome");
-    if (!visible && h.length === 4) {
-      if (x === "top" && b === 3) R(2);
+    if (!visible && h.length === 5) {
+      if (x === "top" && b === 4) R(3);
       h.pop();
-    } else if (visible && h.length === 3) h.push(button);
+    } else if (visible && h.length === 4) h.push(button);
     button.classList.toggle("hidden", !visible);
     document.body.classList.toggle("helper-stopped", visible);
   };
   l("btnResumeHome").addEventListener("mouseover", function () {
-    if (h.length === 4 && x !== "inputs" && !I && !pickerOpen && !undoState)
-      R(3);
+    if (h.length === 5 && x !== "inputs" && !I && !pickerOpen && !undoState)
+      R(4);
   });
   l("btnResumeHome").addEventListener("click", function () {
-    if (h.length === 4) q(3);
+    if (h.length === 5) q(4);
   });
   h.forEach(function (e, t) {
     e.addEventListener("mouseover", function () {

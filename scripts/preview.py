@@ -16,7 +16,7 @@ LAUNCHER_FILES = {
     'index.html', 'style.css', 'renewal-panel.css', 'app.js', 'app-library.js', 'config.js',
     'user-data.js', 'update-panel.js', 'renewal-panel.js', 'profile-bootstrap.js',
     'native-bootstrap.js', 'helper-control.js', 'fonts/outfit.ttf', 'fonts/OFL.txt',
-    'wallpaper.js', 'wallpapers/CREDITS.md',
+    'wallpaper.js', 'weather.js', 'wallpapers/CREDITS.md',
 } | {'wallpapers/' + p.name for p in (Path(__file__).resolve().parent.parent / 'launcher/wallpapers').glob('*.jpg')}
 DEMO_APPS = [
     ('youtube', 'YouTube', '#ffffff'),
@@ -37,7 +37,7 @@ ROOT_LAUNCHER_FILES = {
     'root-profile-data.js', 'root-profile.js', 'root-updates.js',
 }
 # Wallpapers come straight from launcher/; the Root staging does not know about them.
-WALLPAPER_FILES = {name for name in LAUNCHER_FILES if name.startswith('wallpaper')}
+WALLPAPER_FILES = {name for name in LAUNCHER_FILES if name.startswith('wallpaper')} | {'weather.js'}
 ROOT_LAUNCHER_FILES |= WALLPAPER_FILES
 ICON_FILES = {app_id + '.svg' for app_id, _, _ in DEMO_APPS}
 

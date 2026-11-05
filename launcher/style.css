@@ -36,7 +36,7 @@ html, body {
   inset: 0;
   background: #000 center / cover no-repeat;
   opacity: 0;
-  transition: opacity 1500ms ease;
+  transition: opacity 2000ms ease-in-out;
   pointer-events: none;
 }
 
@@ -53,12 +53,14 @@ html, body {
   pointer-events: none;
 }
 
-/* Bright photos need more darkening than night ones. */
+/* Day photos keep their light: a lighter scrim, with a text shadow on the header for legibility. */
 body[data-band="manana"] #wallScrim,
 body[data-band="mediodia"] #wallScrim,
-body[data-band="tarde"] #wallScrim { opacity: 1; }
+body[data-band="tarde"] #wallScrim { opacity: 0.5; }
 body[data-band="noche"] #wallScrim,
 body[data-band="madrugada"] #wallScrim { opacity: 0.7; }
+body.has-wallpaper #leftBlock,
+body.has-wallpaper #hero { text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55), 0 1px 2px rgba(0, 0, 0, 0.5); }
 
 /* ---- ambient glow ---------------------------------------------------------------------------- */
 
@@ -70,12 +72,15 @@ body[data-band="madrugada"] #wallScrim { opacity: 0.7; }
   pointer-events: none;
 }
 
+/* With a wallpaper the glow would tint the photo; only the plain black background keeps it. */
+body.has-wallpaper .ambient { display: none; }
+
 /* ---- top shelf ------------------------------------------------------------------------------- */
 
 #hero {
   position: absolute;
   left: 136px;
-  font-size: 64px;
+  font-size: 48px;
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1;
@@ -140,8 +145,36 @@ body.scrolled header {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Weather above the date, in the date's colour and type; hidden until the first reading. */
+#dateCol { display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 18px; }
+
+#weather {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+#weather.shown { opacity: 1; }
+
+#weather svg {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 #date {
-  margin-bottom: 18px;
   color: rgba(255, 255, 255, 0.65);
   font-size: 28px;
   font-weight: 400;
@@ -159,7 +192,8 @@ body.scrolled header {
   align-items: center;
   height: 60px;
   margin-left: 14px;
-  padding: 0 28px 0 22px;
+  /* Icon only: a 60px square. */
+  padding: 0 14px;
   border-radius:var(--radius);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.05));
   box-shadow:
@@ -175,7 +209,36 @@ body.scrolled header {
   transition: background 200ms ease, box-shadow 200ms ease, transform 260ms cubic-bezier(0.34, 1.5, 0.5, 1);
 }
 
-.pill svg { width: 32px; height: 32px; margin-right: 12px; fill: currentColor; }
+.pill svg { width: 32px; height: 32px; fill: currentColor; }
+
+/* Names live in the tooltip; the spans stay for the Wi-Fi label and screen readers. */
+.pill span { display: none; }
+
+/* Name of the focused top button: a small glass label under the row that glides with #pillGlass.
+   app.js sets the text and the X position. */
+#pillTip {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: 16px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.06)),
+    rgba(30, 30, 36, 0.86);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.4);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform var(--glide);
+}
 
 /* Focus is the gliding #pillGlass below; the pills themselves stay still. */
 
@@ -237,8 +300,11 @@ body.scrolled header {
 #dockBand {
   position: absolute;
   border-radius:var(--radius);
-  /* Translucent so the wallpaper shows through; no blur (too costly on the TV). */
-  background: rgba(14, 14, 16, 0.55);
+  /* Light frosted glass: mostly transparent, slightly blurred. Small radius on purpose: a large
+     backdrop blur is costly on the TV and only repaints during the wallpaper crossfade. */
+  background: rgba(255, 255, 255, 0.06);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
   border: 2px solid rgba(255, 255, 255, 0.12);
 }
 
@@ -308,11 +374,11 @@ body.editing #glass { opacity: 0 !important; }
 .name {
   /* As wide as the column, not the tile, so short titles are not cut. */
   width: calc(var(--pitch) - 12px);
-  height: 30px;
+  height: 26px;
   margin: 12px 0 0 calc((var(--tile) - var(--pitch) + 12px) / 2);
   text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   color: rgba(255, 255, 255, 0.85);
-  font-size: 21px;
+  font-size: 18px;
   font-weight: 500;
   letter-spacing: 0.02em;
   text-align: center;

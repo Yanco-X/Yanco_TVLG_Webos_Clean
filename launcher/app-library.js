@@ -48,6 +48,9 @@
       });
   }
   function create(storage, inventory, config) {
+    // The app opened by the Apps button in the top row is not offered as a tile.
+    if (config.appsButton && internal.indexOf(config.appsButton) < 0)
+      internal.push(config.appsButton);
     var catalog = clean(inventory),
       hidden = unique(config.hiddenApps || []),
       ids,
