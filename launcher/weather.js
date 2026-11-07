@@ -68,7 +68,7 @@
     // Either extra reading may be missing; an empty span is hidden by CSS.
     feels.textContent =
       typeof now.apparent_temperature === "number"
-        ? "Sensación " + Math.round(now.apparent_temperature) + "°C"
+        ? "Real " + Math.round(now.apparent_temperature) + "°C"
         : "";
     humidity.innerHTML =
       typeof now.relative_humidity_2m === "number"
