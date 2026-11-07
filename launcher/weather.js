@@ -1,4 +1,5 @@
-// Current weather above the date: temperature in °C and a monochrome icon. Data from Open-Meteo
+// Current weather above the date: a monochrome icon, temperature, feels-like temperature and
+// relative humidity. Data from Open-Meteo
 // (https://open-meteo.com, free, no API key). Refreshed every REFRESH_MINUTES; if the TV has no
 // network the line stays hidden. CONFIG.weather = {lat, lon} picks the place (Barranquilla by
 // default); CONFIG.weather = false turns it off.
@@ -10,12 +11,18 @@
   var icon = document.getElementById("weatherIcon");
   var temp = document.getElementById("weatherTemp");
   if (!box || !icon || !temp || (window.CONFIG && CONFIG.weather === false)) return;
+  var feels = document.createElement("span");
+  var humidity = document.createElement("span");
+  feels.id = "weatherFeels";
+  humidity.id = "weatherHumidity";
+  box.appendChild(feels);
+  box.appendChild(humidity);
 
   var lat = typeof place.lat === "number" ? place.lat : 10.9685;
   var lon = typeof place.lon === "number" ? place.lon : -74.7813;
   var URL =
     "https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
-    "&current=temperature_2m,weather_code,is_day&timezone=auto";
+    "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,is_day&timezone=auto";
 
   // Line icons on a 24x24 grid, drawn with the text colour (stroke="currentColor").
   var CLOUD = '<path d="M7 18.5h10a4 4 0 0 0 .4-7.98A5.5 5.5 0 0 0 6.9 11 3.75 3.75 0 0 0 7 18.5z"/>';
@@ -37,6 +44,8 @@
     storm: CLOUD_HIGH + '<path d="M12.5 15.5l-2.5 3.5h3.5l-2.5 3.5"/>',
     snow: CLOUD_HIGH + '<path d="M8 18.5v.01M12 20.5v.01M16 18.5v.01M10 22v.01M14 22v.01"/>',
   };
+  var DROP =
+    '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c-3 4-6 7.2-6 10.5a6 6 0 0 0 12 0c0-3.3-3-6.5-6-10.5z"/></svg>';
 
   // WMO weather interpretation codes, as returned by Open-Meteo.
   function kind(code, day) {
@@ -56,6 +65,15 @@
     if (!now || typeof now.temperature_2m !== "number") return;
     icon.innerHTML = ICONS[kind(now.weather_code, now.is_day !== 0)];
     temp.textContent = Math.round(now.temperature_2m) + "°C";
+    // Either extra reading may be missing; an empty span is hidden by CSS.
+    feels.textContent =
+      typeof now.apparent_temperature === "number"
+        ? "Sensación " + Math.round(now.apparent_temperature) + "°C"
+        : "";
+    humidity.innerHTML =
+      typeof now.relative_humidity_2m === "number"
+        ? DROP + Math.round(now.relative_humidity_2m) + "%"
+        : "";
     box.classList.add("shown");
   }
 
